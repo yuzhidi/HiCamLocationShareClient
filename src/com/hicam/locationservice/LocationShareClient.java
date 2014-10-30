@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -126,26 +127,43 @@ public class LocationShareClient {
             }
         }
 
+        private int byteToInt2(byte[] b, int index) {
+
+            int mask = 0xff;
+            int temp = 0;
+            int n = 0;
+            for (int i = 0; i < 4; i++) {
+                n <<= 8;
+                temp = b[i + index] & mask;
+                n |= temp;
+            }
+            System.out.println(n);
+            return n;
+        }
+
         public void connect() throws UnknownHostException, IOException {
             Log.v(TAG, "connect()");
             mSocket = new Socket(mHost, mPort);
             Log.v(TAG, "connect() new Socket done");
             InputStream in = mSocket.getInputStream();
-            ObjectInputStream ois = new ObjectInputStream(in);
+            byte[] buffer = ByteBuffer.allocate(16).array();
 
             while (mRun) {
                 Log.v(TAG, "connect() while(" + mRun + " )");
-                while (mRun && ois.readInt() != MAGIC_NUMBER) {
-                    Log.v(TAG, "connect() not magic number");
+
+                if (in.read(buffer) <= 0) {
+                    mRun = false;
+                    break;
                 }
-                int high = ois.readInt();
-                int low = ois.readInt();
+
+                int high = byteToInt2(buffer, 0);
+                int low = byteToInt2(buffer, 4);
                 double latitude = high + (double) low / 100000000;// 10 -8
                 Log.v(TAG, "connect() high:" + high + ",low:" + low
                         + " ,latitude:" + latitude);
 
-                high = ois.readInt();
-                low = ois.readInt();
+                high = byteToInt2(buffer, 8);
+                low = byteToInt2(buffer, 12);
                 double longitude = high + (double) low / 100000000; // 10 -8
                 Log.v(TAG, "connect() high:" + high + ",low:" + low
                         + " ,longitude:" + longitude);
@@ -154,7 +172,7 @@ public class LocationShareClient {
                 }
             }
             Log.v(TAG, "close socekt");
-            ois.close();
+            in.close();
             mSocket.close();
         }
 
