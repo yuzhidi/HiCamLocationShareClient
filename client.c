@@ -91,7 +91,7 @@ int main(int argc, char * argv[])
 	run = 1;
 	while(run) {
 		printTime();
-		// 77:18  
+		// find magic number 
 		int find = 4;
 		while(find) {
 			read(sockfd, readbuf,1);
@@ -103,7 +103,7 @@ int main(int argc, char * argv[])
 				find=4;
 			}
 		}
-		// at least will recevie 5 int, the length is 20 bytes
+		// at least will recevie 4 int, the length is 16 bytes
 		if(read(sockfd, readbuf,16) <=0) {
 			perror(" oops: client2");
 			exit(1);
