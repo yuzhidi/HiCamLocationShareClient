@@ -51,7 +51,7 @@ public class MainActivity extends Activity implements OnClickListener {
             mLocationShareClient.register(mLocationUpdate);
             break;
         case R.id.stop_register:
-            mLocationShareClient.register(null);
+            mLocationShareClient.unregister(mLocationUpdate);
             Log.v(TAG, "un register");
             break;
         case R.id.submit:
