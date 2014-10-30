@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.hicam.locationservice.LocationClientService.LocationUpdate;
+import com.hicam.locationservice.LocationShareClient.LocationUpdate;
 
 import android.util.Log;
 

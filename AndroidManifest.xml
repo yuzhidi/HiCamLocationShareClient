@@ -27,8 +27,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.hicam.locationservice.LocationClientService" >
-        </service>
     </application>
 
 </manifest>

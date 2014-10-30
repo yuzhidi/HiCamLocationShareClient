@@ -6,33 +6,6 @@
     android:padding="4dip" >
 
     <LinearLayout
-        android:id="@+id/linearlayout"
-        android:layout_width="match_parent"
-        android:layout_height="100dp" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical" >
-
-            <Button
-                android:id="@+id/start_client"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/start_client_service" >
-            </Button>
-
-            <Button
-                android:id="@+id/stop_client"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/stop_client_service" >
-            </Button>
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/linearlayout2"
         android:layout_width="match_parent"
         android:layout_height="100dp"

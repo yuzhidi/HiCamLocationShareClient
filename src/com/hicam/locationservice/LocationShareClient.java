@@ -2,39 +2,21 @@ package com.hicam.locationservice;
 
 import java.io.IOException;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
 import android.util.Log;
 
-public class LocationClientService extends Service {
+public class LocationShareClient {
     public static final String TAG = "LocationClientService";
 
     private NetworkClient mNetworkClient;
-    private IBinder mLocalBinder = new LocalBinder();
     private LocationUpdate mLocationUpdate;
+    private String mAddr;
+    private int mPort = -1;
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mLocalBinder;
+    public LocationShareClient() {
+        init();
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.v(TAG, "onCreate()");
-        create();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.v(TAG, "onDestroy()");
-        destroy();
-    }
-
-    private void create() {
+    private void init() {
         try {
             mNetworkClient = NetworkClient.getInstance();
         } catch (IOException e) {
@@ -44,24 +26,23 @@ public class LocationClientService extends Service {
         }
     }
 
-    private void destroy() {
-        if (mNetworkClient != null) {
-            mNetworkClient.stop();
-        }
+    private void uninit() {
+
     }
 
     public void setIpAddress(String s) {
+        mAddr = s;
+        if(s == null ) {
+            return;
+        }
         mNetworkClient.setIpAddress(s);
     }
 
     public void setPort(int p) {
-        mNetworkClient.setPort(p);
-    }
-
-    public class LocalBinder extends Binder {
-        LocationClientService getService() {
-            return LocationClientService.this;
+        if(p < 0) {
+            return;
         }
+        mNetworkClient.setPort(p);
     }
 
     public interface LocationUpdate {
@@ -72,14 +53,13 @@ public class LocationClientService extends Service {
     public void register(LocationUpdate l) {
         mLocationUpdate = l;
         mNetworkClient.register(mLocationUpdate);
+        if(mAddr == null) {
+            return;
+        }
         if (mLocationUpdate != null) {
             mNetworkClient.start();
             return;
         }
         mNetworkClient.stop();
     }
-
-    // public void unregister(LocationUpdate l) {
-    //
-    // }
 }

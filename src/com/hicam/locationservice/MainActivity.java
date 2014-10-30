@@ -1,29 +1,25 @@
 package com.hicam.locationservice;
 
-import com.hicam.locationservice.LocationClientService.LocationUpdate;
-
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.hicam.locationservice.LocationShareClient.LocationUpdate;
+
 public class MainActivity extends Activity implements OnClickListener {
     public static final String TAG = "MainActivity";
 
-    private static final int MSG_UPDATE = 10;
-    private NetworkState mNetworkState;
-    private boolean mIsClientBind;
-    private LocationClientService mClientBinder;
+    private LocationShareClient mLocationShareClient;
     private LocationUpdate mLocationUpdate = new MyLocationUpdate();
+
+    // only for demo
+    private static final int MSG_UPDATE = 10;
     private EditText mEd0;
     private EditText mEd1;
     private TextView mText;
@@ -35,8 +31,6 @@ public class MainActivity extends Activity implements OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.start_client).setOnClickListener(this);
-        findViewById(R.id.stop_client).setOnClickListener(this);
 
         findViewById(R.id.start_register).setOnClickListener(this);
         findViewById(R.id.stop_register).setOnClickListener(this);
@@ -44,40 +38,21 @@ public class MainActivity extends Activity implements OnClickListener {
         mEd1 = (EditText) findViewById(R.id.editport);
         findViewById(R.id.submit).setOnClickListener(this);
         mText = (TextView) findViewById(R.id.textlog);
-        mNetworkState = new NetworkState(this);
-        mNetworkState.start();
+        //
+        mLocationShareClient = new LocationShareClient();
     }
 
     @Override
     public void onClick(View arg0) {
         switch (arg0.getId()) {
 
-        case R.id.start_client:
-            Log.v(TAG, "onClick, start client");
-            if (!mIsClientBind) {
-                bindService(new Intent(this, LocationClientService.class),
-                        mClientConnection, BIND_AUTO_CREATE);
-            }
-            break;
-        case R.id.stop_client:
-            Log.v(TAG, "onClick, stop client");
-            if (mIsClientBind) {
-                unbindService(mClientConnection);
-            }
-            break;
-
         case R.id.start_register:
-            if (mIsClientBind) {
-                Log.v(TAG, "register");
-                mClientBinder.register(mLocationUpdate);
-            }
+            Log.v(TAG, "register");
+            mLocationShareClient.register(mLocationUpdate);
             break;
         case R.id.stop_register:
-            if (mIsClientBind) {
-                mClientBinder.register(null);
-                Log.v(TAG, "un register");
-                break;
-            }
+            mLocationShareClient.register(null);
+            Log.v(TAG, "un register");
             break;
         case R.id.submit:
             String s0 = mEd0.getText().toString();
@@ -87,34 +62,16 @@ public class MainActivity extends Activity implements OnClickListener {
             Log.v(TAG,
                     "Integer.parseInt(mEd1.getText().toString()):"
                             + Integer.parseInt(s1));
-            if (mClientBinder == null) {
+            if (mLocationShareClient == null) {
                 Log.e(TAG, "R.id.submit, ClientBinder is null");
                 break;
             }
-            mClientBinder.setIpAddress(s0);
-            mClientBinder.setPort(Integer.parseInt(s1));
+            mLocationShareClient.setIpAddress(s0);
+            mLocationShareClient.setPort(Integer.parseInt(s1));
         default:
             break;
         }
     }
-
-    private ServiceConnection mClientConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.v(TAG, "onServiceConnected");
-            mIsClientBind = true;
-            mClientBinder = ((LocationClientService.LocalBinder) service)
-                    .getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.v(TAG, "onServiceDisconnected");
-            mIsClientBind = false;
-            mClientBinder = null;
-        }
-    };
 
     private class MyLocationUpdate implements LocationUpdate {
         @Override
